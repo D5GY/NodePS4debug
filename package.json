@@ -1,0 +1,27 @@
+{
+  "name": "nodeps4debug",
+  "version": "1.0.0",
+  "description": "A easy to use wrapper for communicating to your ps4 via ps4debug.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/D5GY/NodePS4debug.git"
+  },
+  "keywords": [
+    "ps4",
+    "ps4debug"
+  ],
+  "author": "d5gy, Avieah",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/D5GY/NodePS4debug/issues"
+  },
+  "homepage": "https://github.com/D5GY/NodePS4debug#readme",
+  "dependencies": {
+    "net": "^1.0.2",
+    "promise-socket": "^7.0.0"
+  }
+}
