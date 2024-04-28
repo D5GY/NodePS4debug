@@ -1,5 +1,9 @@
-const { default: PromiseSocket } = require('promise-socket');
-const { Socket } = require('net');
+const {
+  default: PromiseSocket
+} = require('promise-socket');
+const {
+  Socket
+} = require('net');
 const socket = new PromiseSocket(new Socket());
 
 const commands = {
@@ -9,10 +13,10 @@ const commands = {
 }
 
 /**
- * 
- * @param { Number } ip 
- * @param { string } port 
- * @returns
+ * Connects to the PS4.
+ * @param {string} ip - The IP address to connect to.
+ * @param {string} port - The port to connect to.
+ * @returns {Promise<boolean>}
  */
 const connect = async (ip, port = 744) => {
   try {
@@ -23,16 +27,20 @@ const connect = async (ip, port = 744) => {
   }
 }
 
+/**
+ * Disconnects from the PS4.
+ * @returns {boolean} - Returns true if disconnection is successful.
+ */
 const disconnect = () => {
   socket.destroy();
   return true;
 }
 
 /**
- * 
- * @param { string } message 
- * @param { number } type 
- * @returns 
+ * Notifies the PS4.
+ * @param {string} message - Notification message.
+ * @param {number} type - Notification type.
+ * @returns {Promise<any>} - Returns the status received from the PS4.
  */
 const notify = async (message, type = 222) => {
   try {
@@ -41,7 +49,7 @@ const notify = async (message, type = 222) => {
     await socket.write(intToBuffer(message.length + 1));
     await socket.write(Uint8Array.from(Buffer.from(message)));
     await socket.write(Uint8Array.from([0x00]));
-    return await recivedStatus();
+    return await receivedStatus();
   } catch (error) {
     throw new Error(error);
   }
@@ -53,7 +61,13 @@ module.exports = {
   notify
 }
 
-async function sendCMDPacket (cmdType, packetSize) {
+/**
+ * Sends a command packet to the PS4.
+ * @param {Array} cmdType - Command type.
+ * @param {number} packetSize - Packet size.
+ * @returns {Promise<boolean>} - Returns true if the command packet is successfully sent.
+ */
+async function sendCMDPacket(cmdType, packetSize) {
   let packetBuffer = appendBuffer(commands.CMD_PACKET_MAGIC, cmdType);
   packetBuffer = appendBuffer(packetBuffer, intToBuffer(packetSize));
   try {
@@ -64,7 +78,7 @@ async function sendCMDPacket (cmdType, packetSize) {
   }
 }
 
-async function recivedStatus () {
+async function receivedStatus() {
   let status = await socket.read(4);
   return status;
 }
@@ -75,6 +89,7 @@ function appendBuffer(buffer1, buffer2) {
   buffer.set(new Uint8Array(buffer2), buffer1.length);
   return buffer;
 }
+
 function intToBuffer(int) {
   let buffer = new Buffer.alloc(4);
   buffer.writeUInt32LE(int);

@@ -1,6 +1,6 @@
 {
   "name": "nodeps4debug",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A easy to use wrapper for communicating to your ps4 via ps4debug.",
   "main": "index.js",
   "scripts": {
