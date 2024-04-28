@@ -5,7 +5,7 @@ A easy to use, fully async wrapper for PS4debug written in JavaScript.
 Installing
 ----------
 
-To install the libray you can run the following command:
+To install the library you can run the following command:
 
 .. code:: sh
 
