@@ -1,10 +1,10 @@
-# nodeps4debug
+# NodePS4debug
 
 A easy to use, fully async wrapper for PS4debug written in JavaScript.
 
 ## Installation
 
-Use the package manager [npm](https://nodejs.org/en/) to install nodeps4debug.
+Use the package manager [npm](https://nodejs.org/en/) to install NodePS4debug.
 
 ```bash
 npm install nodeps4debug
