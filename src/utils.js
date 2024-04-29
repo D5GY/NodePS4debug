@@ -47,7 +47,7 @@ class Utils {
    * @param {PromiseSocket<Socket>} socket
    */
   receivedStatus = async (socket) => {
-    await socket.read(4);
+    return await socket.read(4);
   }
   /**
    * 
