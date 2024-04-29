@@ -20,6 +20,7 @@ const { connect, notify, disconnect } = require("nodeps4debug");
   const notifyResponse = await notify('Hello');
   console.log(notifyResponse); // Returns a Buffer
   console.log(disconnect()) // Returns a boolean
+  console.log(await getProcessList()) // Returns an Object
 })().catch(console.error);
 ```
 
