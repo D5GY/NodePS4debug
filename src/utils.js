@@ -13,6 +13,8 @@ class Utils {
       CMD_PROC_MAPS: [0x04, 0x00, 0xAA, 0xBD],
       CMD_PROC_INFO: [0x0A, 0x00, 0xAA, 0xBD],
       CMD_PROC_WRITE: [0x03, 0x00, 0xAA, 0xBD],
+      CMD_PROC_READ: [0x02, 0x00, 0xAA, 0xBD],
+      CMD_CONSOLE_REBOOT: [0x01, 0x00, 0xDD, 0xBD], // 0xBD 0xDD 0x00 0x01
       CMD_CONSOLE_NOTIFY_PACKET_SIZE: 8,
       PROC_LIST_ENTRY_SIZE: 36,
       PROC_MAP_ENTRY_SIZE: 58,
@@ -20,7 +22,7 @@ class Utils {
       CMD_PROC_MAPS_PACKET_SIZE: 4,
       CMD_PROC_INFO_PACKET_SIZE: 4,
       CMD_PROC_WRITE_PACKET_SIZE: 16,
-      NET_MAX_LENGT: 8192
+      CMD_PROC_READ_PACKET_SIZE: 16
     }
   }
 
@@ -61,6 +63,7 @@ class Utils {
     buffer.set(new Uint8Array(buffer2), buffer1.length);
     return buffer;
   }
+
   /**
    * 
    * @param {number} int 
@@ -72,28 +75,5 @@ class Utils {
     return buffer;
   }
 
-  /**
-   * 
-   * @param {*} data 
-   * @param {number} length 
-   * @param {PromiseSocket<Socket>} socket
-   */
-  sendData = (data, length, socket) => {
-    let left = length;
-    let offset = 0;
-    let sent = 0;
-
-    while (left > 0) {
-      if (left > this.commands.NET_MAX_LENGTH) {
-        let bytes = data.slice(offset, offset + this.commands.NET_MAX_LENGTH);
-        sent = socket.write(bytes);
-      } else {
-        let bytes = data.slice(offset, offset + left);
-        sent = socket.write(bytes);
-      }
-      offset += sent;
-      left -= sent;
-    }
-  }
 }
 module.exports = new Utils;
