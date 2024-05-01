@@ -32,6 +32,17 @@ const disconnect = () => {
 }
 
 /**
+ * Sends a command to reboot the console.
+ * This function triggers a reboot operation on the connected console by sending the appropriate command packet.
+ */
+const reboot = async () => { 
+  Utils.sendCMDPacket(Utils.commands.CMD_CONSOLE_REBOOT, 0, socket)
+  const status = await Utils.receivedStatus(socket);
+  
+  console.log(status)
+}
+ 
+/**
  * Notifies the PS4.
  * @param {string} message - Notification message.
  * @param {number} type - Notification type.
@@ -83,70 +94,93 @@ const getProcessList = async () => {
   }
 }
 
+// /**
+//  * Retrieves detailed information for a specific process from the PS4.
+//  * @param {number} pid - The process ID for which to retrieve information.
+//  * @returns {Promise<Object>} An object containing detailed information about the process.
+//  */
+// const getProcessInfo = async (pid) => {
+//   try {
+//     await Utils.sendCMDPacket(Utils.commands.CMD_PROC_INFO, Utils.commands.CMD_PROC_INFO_PACKET_SIZE, (pid), socket);
+
+//     const dataBuffer = await socket.read(Utils.commands.PROC_PROC_INFO_SIZE);
+//     if (dataBuffer.length < Utils.commands.PROC_PROC_INFO_SIZE)
+
+//     return {
+//       pid: dataBuffer.readInt32LE(0),
+//       name: dataBuffer.toString('ascii', 4, 36).replace(/\0.*$/, ''),
+//     };
+//   } catch (error) {
+//     throw new Error(error);
+//   }
+// }
+
 /**
- * Retrieves a list of process maps from the PS4.
- * This function sends a command to get the process maps for a specific PID, receives and interprets the data.
- * @param {number} pid - Process ID to retrieve the maps for.
- * @returns {Promise<Object>} An object containing the process ID and arrays with map entries.
+ * Writes memory to a specific process on the PS4 by sending a command with associated payload.
+ * This function constructs a payload that includes the process ID, memory address, and the
+ * length of the data to be written. It sends this payload along with the actual data to the PS4
+ * using the provided socket connection.
+ *
+ * @param {number} pid - The process ID to which the memory will be written.
+ * @param {number} address - The memory address in the process's space where the data will start to be written.
+ * @param {Buffer} value - The data to write to the specified memory address. This should be a Buffer containing the binary data.
+ * @returns {Promise<boolean>} A promise that resolves to a status indicating whether the memory write was successful.
  */
-const getProcessMaps = async (pid) => {
+const writeMemory = async (pid, address, value) => {
   try {
-    await Utils.sendCMDPacket(Utils.commands.CMD_PROC_MAPS, Utils.commands.PROC_MAP_ENTRY_SIZE, (pid), socket);
+    const payload = Buffer.alloc(16);
+    payload.writeUInt32LE(pid, 0);
+    payload.writeUInt32LE(address, 4);
+    payload.writeUInt32LE(value.length, 12);
+
+    await Utils.sendCMDPacket(Utils.commands.CMD_PROC_WRITE, Utils.commands.CMD_PROC_WRITE_PACKET_SIZE, socket);
+
+    await socket.write(payload);
+    await socket.write(value);
+
     await Utils.receivedStatus(socket);
-
-    const numberBuffer = await socket.read(4);
-    const number = numberBuffer.readInt32LE(0);
-    const data = await socket.read(number * Utils.commands.PROC_MAP_ENTRY_SIZE);
-    let entries = [];
-
-    for (let i = 0; i < number; i++) {
-      let offset = i * Utils.commands.PROC_MAP_ENTRY_SIZE;
-      entries.push({
-        name: data.toString('ascii', offset, offset + 32).replace(/\0.*$/, ''),
-        start: data.readBigUInt64LE(offset + 32),
-        end: data.readBigUInt64LE(offset + 40),
-        offset: data.readBigUInt64LE(offset + 48),
-        prot: data.readUInt16LE(offset + 56)
-      });
-    }
-
-    return {
-      pid,
-      entries
-    };
   } catch (error) {
     throw new Error(error);
   }
 }
 
 /**
- * Retrieves detailed information for a specific process from the PS4.
- * @param {number} pid - The process ID for which to retrieve information.
- * @returns {Promise<Object>} An object containing detailed information about the process.
+ * Reads memory from a specific process on the PS4 by sending a command with associated payload.
+ * This function constructs a payload that includes the process ID, memory address, and the
+ * length of data to be read. It sends this payload to the PS4 using the provided socket connection
+ * and then reads the response data from the socket.
+ *
+ * @param {number} pid - The process ID from which to read memory.
+ * @param {number} address - The memory address in the process's space from which to start reading.
+ * @param {number} length - The number of bytes to read from the specified memory address.
+ * @returns {Promise<Buffer>} A promise that resolves to a buffer containing the read data if successful.
  */
-const getProcessInfo = async (pid) => {
+const readMemory = async (pid, address, length) => {
   try {
-    await Utils.sendCMDPacket(Utils.commands.CMD_PROC_INFO, Utils.commands.CMD_PROC_INFO_PACKET_SIZE, (pid), socket);
+    const payload = Buffer.alloc(16);
+    payload.readUInt32LE(pid, 0);
+    payload.readUInt32LE(address, 4);
+    payload.readUInt32LE(length, 12);
 
-    const dataBuffer = await socket.read(Utils.commands.PROC_PROC_INFO_SIZE);
-    if (dataBuffer.length < Utils.commands.PROC_PROC_INFO_SIZE) {
-      throw new Error('Incomplete process information received.');
-    }
+    await Utils.sendCMDPacket(Utils.commands.CMD_PROC_WRITE, Utils.commands.CMD_PROC_WRITE_PACKET_SIZE, socket);
 
-    return {
-      pid: dataBuffer.readInt32LE(0),
-      name: dataBuffer.toString('ascii', 4, 36).replace(/\0.*$/, ''),
-    };
+    await socket.read(payload);
+    await socket.read(length);
+
+    await Utils.receivedStatus(socket);
   } catch (error) {
     throw new Error(error);
   }
 }
+
 
 module.exports = {
   connect,
   disconnect,
+  reboot,
   notify,
   getProcessList,
-  getProcessMaps,
-  getProcessInfo,
+  // getProcessInfo,
+  writeMemory,
+  readMemory
 }
