@@ -37,9 +37,6 @@ const disconnect = () => {
  */
 const reboot = async () => { 
   Utils.sendCMDPacket(Utils.commands.CMD_CONSOLE_REBOOT, 0, socket)
-  const status = await Utils.receivedStatus(socket);
-  
-  console.log(status)
 }
  
 /**
@@ -93,27 +90,6 @@ const getProcessList = async () => {
     throw new Error(error);
   }
 }
-
-// /**
-//  * Retrieves detailed information for a specific process from the PS4.
-//  * @param {number} pid - The process ID for which to retrieve information.
-//  * @returns {Promise<Object>} An object containing detailed information about the process.
-//  */
-// const getProcessInfo = async (pid) => {
-//   try {
-//     await Utils.sendCMDPacket(Utils.commands.CMD_PROC_INFO, Utils.commands.CMD_PROC_INFO_PACKET_SIZE, (pid), socket);
-
-//     const dataBuffer = await socket.read(Utils.commands.PROC_PROC_INFO_SIZE);
-//     if (dataBuffer.length < Utils.commands.PROC_PROC_INFO_SIZE)
-
-//     return {
-//       pid: dataBuffer.readInt32LE(0),
-//       name: dataBuffer.toString('ascii', 4, 36).replace(/\0.*$/, ''),
-//     };
-//   } catch (error) {
-//     throw new Error(error);
-//   }
-// }
 
 /**
  * Writes memory to a specific process on the PS4 by sending a command with associated payload.
@@ -180,7 +156,6 @@ module.exports = {
   reboot,
   notify,
   getProcessList,
-  // getProcessInfo,
   writeMemory,
   readMemory
 }
