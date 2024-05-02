@@ -13,7 +13,7 @@ npm install nodeps4debug
 ## Usage
 
 ```javascript
-const { connect, notify, disconnect } = require("nodeps4debug");
+const { connect, notify, disconnect, reboot, writeMemory, readMemory } = require("nodeps4debug");
 
 (async() => {
   await connect('192.168.137.166') // Returns true or an error code.
@@ -21,6 +21,9 @@ const { connect, notify, disconnect } = require("nodeps4debug");
   console.log(notifyResponse); // Returns a Buffer
   console.log(disconnect()) // Returns a boolean
   console.log(await getProcessList()) // Returns an Object
+  console.log(await writeMemory(90, "0x5E394E1", Buffer.from("31C990", 'hex')))
+  console.log(await readMemory(90, "0x5E394E1", Buffer.from("31C990", 'hex')))
+  console.log(reboot())
 })().catch(console.error);
 ```
 
