@@ -149,6 +149,29 @@ const readMemory = async (pid, address, length) => {
   }
 }
 
+/**
+ * Loads an ELF file into a specified process.
+ * @param {number} pid - The process ID.
+ * @param {Buffer} buffer - The ELF file buffer.
+ * @returns {Promise<bigint>} - Returns the address where the ELF was loaded.
+ */
+const loadElf = async (pid, buffer) => {
+  try {
+    await Utils.sendCMDPacket(Utils.commands.CMD_PROC_ELF, Utils.commands.CMD_PROC_ELF_PACKET_SIZE, socket);
+    await socket.write(Utils.intToBuffer(pid));
+    await socket.write(Utils.intToBuffer(buffer.length));
+    await Utils.receivedStatus(socket);
+
+    await socket.write(buffer);
+    await Utils.receivedStatus(socket);
+
+    const response = await socket.read(8);
+    return response.readBigUInt64LE(0);
+  } catch (error) {
+     throw new Error(error);
+  }
+};
+
 
 module.exports = {
   connect,
@@ -157,5 +180,6 @@ module.exports = {
   notify,
   getProcessList,
   writeMemory,
-  readMemory
+  readMemory,
+  loadElf
 }
