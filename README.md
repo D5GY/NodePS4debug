@@ -23,6 +23,8 @@ const { connect, notify, disconnect, reboot, writeMemory, readMemory } = require
   console.log(await getProcessList()) // Returns an Object
   console.log(await writeMemory(90, "0x5E394E1", Buffer.from("31C990", 'hex')))
   console.log(await readMemory(90, "0x5E394E1", Buffer.from("31C990", 'hex')))
+  const elfBuffer = fs.readFileSync('path/to/your/file.elf'); // Read the .elf file and load it
+  await loadElf(90, elfBuffer);
   console.log(reboot())
 })().catch(console.error);
 ```
